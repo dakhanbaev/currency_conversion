@@ -11,7 +11,7 @@ from tests.e2e import api_client
 def test_get_last_update(name, response):
     r = api_client.get_last_update(name)
     r.raise_for_status()
-    assert r.status_code == 200
+    assert r.status_code == status.HTTP_200_OK
     assert r.ok
     result = r.json()
     assert result.get("last_update", None)
