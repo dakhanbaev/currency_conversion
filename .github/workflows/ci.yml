@@ -29,5 +29,5 @@ jobs:
 
     - name: Measure code coverage
       run: |
-        coverage run -m pytest tests/unit /tests/integration
+        coverage run -m pytest tests/unit tests/integration
         coverage report -m
