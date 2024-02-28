@@ -20,4 +20,3 @@ def get_exchangerate_api_url() -> str:
     api_token = os.environ.get("API_TOKEN")
     url = "https://v6.exchangerate-api.com/v6/{}/latest/"
     return url.format(api_token)
-

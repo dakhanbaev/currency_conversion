@@ -20,7 +20,7 @@ class InvalidCode(Exception):
 async def update_rate(
     currency_name: messages.UpdateExchangeRates,
     uow: unit_of_work.SqlAlchemyUnitOfWork,
-    api: external_api.ExchangeRateApi
+    api: external_api.ExchangeRateApi,
 ):
     async with uow:
         if (currency := await uow.currencies.get(name=currency_name.name)) is None:
@@ -32,9 +32,9 @@ async def update_rate(
         else:
             await uow.currencies.delete(currency_id=currency.id)
         rates = await api.get_all_rates(code=currency_name.name)
-        currency.rates.extend([
-            model.ConversionRate(code=code, rate=rate) for code, rate in rates.items()
-        ])
+        currency.rates.extend(
+            [model.ConversionRate(code=code, rate=rate) for code, rate in rates.items()]
+        )
         currency.last_update = datetime.datetime.now()
         await uow.commit()
 
@@ -42,15 +42,18 @@ async def update_rate(
 async def convert_currency(
     convert: messages.ConvertCurrency,
     uow: unit_of_work.SqlAlchemyUnitOfWork,
-    api: external_api.ExchangeRateApi
+    api: external_api.ExchangeRateApi,
 ):
     async with uow:
         if (currency := await uow.currencies.get(name=convert.source_currency)) is None:
-            await update_rate(messages.UpdateExchangeRates(name=convert.source_currency), uow=uow, api=api)
+            await update_rate(
+                messages.UpdateExchangeRates(name=convert.source_currency),
+                uow=uow,
+                api=api,
+            )
             currency = await uow.currencies.get(name=convert.source_currency)
         conversion_rate = await uow.currencies.get_rate(
-            currency_id=currency.id,
-            rate_code=convert.target_currency
+            currency_id=currency.id, rate_code=convert.target_currency
         )
         return convert.amount * conversion_rate.rate
 

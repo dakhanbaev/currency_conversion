@@ -61,12 +61,16 @@ class SqlAlchemyRepository(AbstractRepository):
 
     async def get_rate(self, currency_id: int, rate_code: str) -> model.ConversionRate:
         return (
-            (await self.session.execute(select(model.ConversionRate).where(and_(
-                orm.conversion_rates.c.currency_id == currency_id,
-                orm.conversion_rates.c.code == rate_code
-            ))))
+            (
+                await self.session.execute(
+                    select(model.ConversionRate).where(
+                        and_(
+                            orm.conversion_rates.c.currency_id == currency_id,
+                            orm.conversion_rates.c.code == rate_code,
+                        )
+                    )
+                )
+            )
             .scalars()
             .one_or_none()
         )
-
-

@@ -16,7 +16,11 @@ async def update_exchange_rates(name: str):
     return {"result": "Updated successfully"}
 
 
-@app.get("/last_update/{name}", status_code=status.HTTP_200_OK, response_model=schemas.CurrencyGET)
+@app.get(
+    "/last_update/{name}",
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.CurrencyGET,
+)
 async def last_update(name: str) -> schemas.CurrencyGET:
     result = await views.currencies(name, uow=bus.uow)
     if not result:
@@ -37,4 +41,3 @@ async def convert_currency(request: schemas.CurrencyConversionRequest):
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
-

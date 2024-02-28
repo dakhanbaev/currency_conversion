@@ -40,7 +40,9 @@ class FakeClientResponse:
 
     async def json(self):
         if self.raise_json:
-            raise client_exceptions.ContentTypeError("This is a ContentTypeError", history=())
+            raise client_exceptions.ContentTypeError(
+                "This is a ContentTypeError", history=()
+            )
         return self.content
 
     def raise_for_status(self):
@@ -51,20 +53,16 @@ class FakeClientResponse:
 @pytest.fixture
 def get_response():
     content = {
-            "result": "success",
-            "conversion_rates":
-                {
-                    "USD": 1,
-                    "AED": 3.6725,
-                    "AFN": 73.7913,
-                    "ALL": 95.7917,
-                    "AMD": 405.2462
-                }
-        }
-    return partial(
-        FakeClientResponse,
-        status=200,
-        content=content)
+        "result": "success",
+        "conversion_rates": {
+            "USD": 1,
+            "AED": 3.6725,
+            "AFN": 73.7913,
+            "ALL": 95.7917,
+            "AMD": 405.2462,
+        },
+    }
+    return partial(FakeClientResponse, status=200, content=content)
 
 
 @pytest.fixture
@@ -81,11 +79,9 @@ def exchange_rate_api(get_session):
 
 
 class TestExchangeRateApi:
-
     @pytest.mark.asyncio
     async def test_get_all_rates(self, exchange_rate_api):
         name = "USD"
         result = await exchange_rate_api.get_all_rates(name)
         assert result is not None
         assert len(result) == 5
-

@@ -34,4 +34,3 @@ class CurrencyConversionRequest(BaseModel):
         if amount is None or amount <= 0:
             raise ValueError("amount cannot be None or amount <= 0")
         return amount
-

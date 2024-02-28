@@ -53,7 +53,6 @@ class ExchangeRateApi:
     async def get_all_rates(self, code: str) -> dict:
         url = f"{self.API_URL}{code}"
         result = await self._get_exchange_rates(url)
-        if rates := result.get('conversion_rates'):
+        if rates := result.get("conversion_rates"):
             return rates
         return {}
-

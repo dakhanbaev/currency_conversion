@@ -4,9 +4,7 @@ from src import config as _config
 
 def get_update(name):
     url = _config.get_api_url()
-    r = requests.get(
-        f"{url}/update/{name}"
-    )
+    r = requests.get(f"{url}/update/{name}")
     r.raise_for_status()
     assert r.status_code == 200
     assert r.json() == {"result": "Updated successfully"}
@@ -19,7 +17,7 @@ def post_to_convert(source_currency, target_currency, amount):
         json={
             "source_currency": source_currency,
             "target_currency": target_currency,
-            "amount": amount
+            "amount": amount,
         },
     )
     r.raise_for_status()
@@ -31,4 +29,3 @@ def post_to_convert(source_currency, target_currency, amount):
 def get_last_update(name):
     url = _config.get_api_url()
     return requests.get(f"{url}/last_update/{name}")
-

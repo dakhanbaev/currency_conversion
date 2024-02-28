@@ -47,4 +47,3 @@ def sqlite_session_factory(in_memory_sqlite_db, create_db):
 @pytest.fixture
 def session(sqlite_session_factory):
     return sqlite_session_factory()
-

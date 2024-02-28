@@ -7,7 +7,7 @@ from src.external_service import external_api
 def bootstrap(
     start_orm: bool = True,
     uow: unit_of_work.AbstractUnitOfWork = unit_of_work.SqlAlchemyUnitOfWork(),
-    api: external_api.ExternalApi = external_api.ExchangeRateApi()
+    api: external_api.ExternalApi = external_api.ExchangeRateApi(),
 ) -> messagebus.MessageBus:
 
     if start_orm:
@@ -38,4 +38,3 @@ def inject_dependencies(handler, dependencies):
         name: dependency for name, dependency in dependencies.items() if name in params
     }
     return lambda message: handler(message, **deps)
-

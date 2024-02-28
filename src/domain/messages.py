@@ -24,4 +24,3 @@ class Event:
 
 
 Message = Union[Event, Command]
-

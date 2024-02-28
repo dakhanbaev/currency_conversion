@@ -13,4 +13,3 @@ def test_models_init():
     assert rate2.rate == 20.8
     assert rate2.code == "EUR"
     assert rate1.code == "USD"
-

@@ -1,4 +1,4 @@
-# Currency Conversion API 
+# Currency Conversion API
 
 
 - [Installation](#installation)
@@ -13,7 +13,7 @@
     git clone https://github.com/dakhanbaev/currency_conversion.git
     ```
 
-2. Navigate to the project directory: 
+2. Navigate to the project directory:
 
     ```bash
     cd currency_conversion

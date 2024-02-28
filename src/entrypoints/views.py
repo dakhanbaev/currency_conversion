@@ -13,4 +13,3 @@ async def currencies(name: str, uow: unit_of_work.AbstractUnitOfWork):
             {"name": name},
         )
         return results.mappings().first()
-

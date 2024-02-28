@@ -14,4 +14,3 @@ async def test_get_rate(sqlite_session_factory):
     currency = await repo.get("USD")
     result = await repo.get_rate(currency_id=currency.id, rate_code="USD")
     assert result == rate1
-

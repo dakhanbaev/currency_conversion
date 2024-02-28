@@ -41,4 +41,3 @@ async def test_uow_can_save_data(sqlite_session_factory):
 
     new_code = await get_currency(session, "RUB")
     assert new_code == "RUB"
-
