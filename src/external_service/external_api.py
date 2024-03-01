@@ -1,8 +1,12 @@
 import abc
+import logging
 from aiohttp import ClientSession, ClientResponse, client_exceptions
 from fastapi import status, HTTPException
 
 from src.config import get_exchangerate_api_url
+
+
+logger = logging.getLogger(__name__)
 
 
 async def get_client_session() -> ClientSession:
@@ -26,12 +30,9 @@ class ExchangeRateApi:
     client_session = ClientSession
 
     async def _get_exchange_rates(self, url: str) -> dict:
-        try:
-            async with self.client_session() as session:
-                async with session.get(url) as response:
-                    return await self._parse_response(response)
-        except Exception as e:
-            raise e
+        async with self.client_session() as session:
+            async with session.get(url) as response:
+                return await self._parse_response(response)
 
     @staticmethod
     async def _parse_response(response: ClientResponse) -> dict:

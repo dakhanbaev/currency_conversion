@@ -1,6 +1,6 @@
 # Makefile
 
-.PHONY: run down log restart
+.PHONY: run down log restart coverage report pre-commit
 
 run:
 	docker-compose -f docker-compose.yml up -d --build
@@ -10,3 +10,10 @@ down:
 	docker compose -f docker-compose.yml down --remove-orphans
 log:
 	docker-compose logs -f api
+coverage:
+	coverage run -m pytest tests/unit tests/integration
+report:
+	coverage report -m
+	coverage html
+pre-commit:
+	pre-commit run --all-files

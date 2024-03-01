@@ -1,8 +1,9 @@
 from functools import partial
 
 import pytest
-from aiohttp import client_exceptions
-from src.external_service.external_api import ExchangeRateApi
+from aiohttp import client_exceptions, ClientSession
+from fastapi import status, HTTPException
+from src.external_service.external_api import ExchangeRateApi, get_client_session
 import src.config as _config
 
 
@@ -17,9 +18,6 @@ class FakeClientSession:
 
     def get(self, url):
         return self.response(url=url)
-
-    async def close(self):
-        pass
 
 
 class FakeClientResponse:
@@ -47,7 +45,7 @@ class FakeClientResponse:
 
     def raise_for_status(self):
         if self.raise_exception:
-            raise Exception("TEST Exception")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @pytest.fixture
@@ -85,3 +83,64 @@ class TestExchangeRateApi:
         result = await exchange_rate_api.get_all_rates(name)
         assert result is not None
         assert len(result) == 5
+
+    @pytest.mark.asyncio
+    async def test_get_all_rates_unhappy(self, exchange_rate_api, get_session):
+        get_session.response = partial(
+            FakeClientResponse,
+            status=status.HTTP_200_OK,
+            content={},
+            url="",
+        )
+        name = "USD"
+        result = await exchange_rate_api.get_all_rates(name)
+        assert result is not None
+        assert result == {}
+        assert len(result) == 0
+
+    @pytest.mark.asyncio
+    async def test_request_handler_raise_for_status(
+        self, exchange_rate_api, get_session
+    ):
+        get_session.response = partial(
+            FakeClientResponse,
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={},
+            url="",
+            raise_exception=True,
+        )
+        name = "BTS"
+        with pytest.raises(HTTPException) as exc:
+            await exchange_rate_api.get_all_rates(name)
+
+        assert isinstance(exc.value, HTTPException)
+        assert exc.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    @pytest.mark.asyncio
+    async def test_request_handler_not_implemented(
+        self, exchange_rate_api, get_session
+    ):
+        get_session.response = partial(
+            FakeClientResponse,
+            status=status.HTTP_501_NOT_IMPLEMENTED,
+            content={},
+            url="",
+            raise_json=True,
+        )
+        name = "BTS"
+
+        with pytest.raises(HTTPException) as exc:
+            await exchange_rate_api.get_all_rates(name)
+
+        assert isinstance(exc.value, HTTPException)
+        assert exc.value.status_code == status.HTTP_501_NOT_IMPLEMENTED
+
+
+@pytest.mark.asyncio
+async def test_get_client_session():
+    async for session in get_client_session():
+        assert isinstance(session, ClientSession)
+        assert session is not None
+        async with session.get("https://www.exchangerate-api.com/") as response:
+            assert response.status == status.HTTP_200_OK
+    assert session.closed is True
