@@ -21,13 +21,16 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Run the service
+      run: make run
+
     - name: pre-commit
       run: pre-commit run --all-files
 
     - name: Run tests
-      run: pytest tests/unit tests/integration
+      run: pytest tests/
 
     - name: Measure code coverage
       run: |
-        coverage run -m pytest tests/unit tests/integration
+        coverage run -m pytest tests/
         coverage report -m

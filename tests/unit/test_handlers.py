@@ -1,4 +1,5 @@
 import pytest
+from fastapi import HTTPException, status
 from src.adapters import repository
 from src.service_layer import unit_of_work
 from src.external_service import external_api
@@ -18,7 +19,9 @@ class FakeRepository(repository.AbstractRepository):
         return next((c for c in self._currencies if c.name == name), None)
 
     async def delete(self, currency_id: int):
-        pass
+        for c in self._currencies:
+            if c.id == currency_id:
+                del c.rates
 
     async def get_rate(self, currency_id: int, rate_code: str):
         return next(
@@ -55,6 +58,10 @@ class FakeExchangeRateApi(external_api.ExternalApi):
         }
 
 
+class FakeEvent:
+    pass
+
+
 def bootstrap_test_app():
     return bootstrap.bootstrap(
         start_orm=False, uow=FakeUnitOfWork(), api=FakeExchangeRateApi()
@@ -62,9 +69,21 @@ def bootstrap_test_app():
 
 
 class TestUpdateExchangeRates:
-    @pytest.mark.asyncio
-    async def test_update_rate(self):
+    @pytest.fixture
+    async def setup(self):
         bus = bootstrap_test_app()
+        await bus.handle(messages.UpdateExchangeRates(name="BTS"))
+        return bus
+
+    @pytest.mark.asyncio
+    async def test_update_rate(self, setup):
+        bus = await setup
+        assert (currency2 := await bus.uow.currencies.get("BTS")) is not None
+        assert len(currency2.rates) == 5
+
+    @pytest.mark.asyncio
+    async def test_update_rate_with_exits_currency(self, setup):
+        bus = await setup
         await bus.handle(messages.UpdateExchangeRates(name="BTS"))
         assert (currency2 := await bus.uow.currencies.get("BTS")) is not None
         assert len(currency2.rates) == 5
@@ -81,3 +100,35 @@ class TestConvertCurrency:
         )
         assert result is not None
         assert result == 100
+
+    @pytest.mark.asyncio
+    async def test_convert_currency_with_not_exits_rate(self):
+        bus = bootstrap_test_app()
+
+        with pytest.raises(HTTPException) as exc:
+            await bus.handle(
+                messages.ConvertCurrency(
+                    source_currency="BTS", target_currency="BTS", amount=100
+                )
+            )
+        assert isinstance(exc.value, HTTPException)
+        assert exc.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
+class TestEvents:
+    @pytest.mark.asyncio
+    async def test_message_event(self):
+        bus = bootstrap_test_app()
+        try:
+            await bus.handle(messages.CheckEvent())
+        except Exception as e:
+            pytest.fail("DID RAISE {0}".format(e))
+
+    @pytest.mark.asyncio
+    async def test_message_unknown(self):
+        bus = bootstrap_test_app()
+
+        with pytest.raises(TypeError) as exc:
+            await bus.handle(FakeEvent)
+        assert isinstance(exc.value, TypeError)
+        assert exc.value.args == ("Unknown message. <class 'type'>",)

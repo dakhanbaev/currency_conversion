@@ -4,6 +4,7 @@ import functools
 import logging
 from typing import TYPE_CHECKING, Callable, Dict, List, Type, Iterable
 
+from fastapi import HTTPException, status
 from src.domain import messages
 
 if TYPE_CHECKING:
@@ -52,8 +53,9 @@ class MessageBus:
                     results.append(result)
                 self.queue.extend(self.uow.collect_new_events())
                 return results
-            except Exception:
+            except Exception as e:
                 logger.exception("Exception handling event %s", event)
+                logger.exception(e)
                 continue
 
     @_handle.register(messages.Command)
@@ -66,6 +68,8 @@ class MessageBus:
                 results.append(result)
             self.queue.extend(self.uow.collect_new_events())
             return results
-        except Exception:
+        except Exception as e:
             logger.exception("Exception handling command %s", command)
-            raise
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+            )

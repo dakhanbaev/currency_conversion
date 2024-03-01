@@ -58,9 +58,13 @@ async def convert_currency(
         return convert.amount * conversion_rate.rate
 
 
+async def check_events(check: messages.CheckEvent):
+    pass
+
+
 COMMAND_HANDLERS = {
     messages.UpdateExchangeRates: update_rate,
     messages.ConvertCurrency: convert_currency,
 }
 
-EVENT_HANDLERS = {}
+EVENT_HANDLERS = {messages.CheckEvent: [check_events]}

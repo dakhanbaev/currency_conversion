@@ -23,4 +23,9 @@ class Event:
     pass
 
 
+@dataclass
+class CheckEvent(Event):
+    pass
+
+
 Message = Union[Event, Command]
