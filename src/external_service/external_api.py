@@ -1,5 +1,6 @@
 import abc
 import logging
+from functools import reduce
 from aiohttp import ClientSession, ClientResponse, client_exceptions
 from fastapi import status, HTTPException
 
@@ -54,6 +55,10 @@ class ExchangeRateApi:
     async def get_all_rates(self, code: str) -> dict:
         url = f"{self.API_URL}{code}"
         result = await self._get_exchange_rates(url)
-        if rates := result.get("conversion_rates"):
-            return rates
+        path = f"conversion_rates.{code.upper()}"
+        if (
+            cur_rate := reduce(lambda d, k: d.get(k, {}), path.split("."), result)
+        ) and cur_rate == 1:
+            logger.info(f"Get rate for currency: {code} with rate {cur_rate}")
+            return result.get("conversion_rates")
         return {}

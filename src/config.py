@@ -1,22 +1,41 @@
-import os
+from functools import lru_cache
+from fastapi import Depends
+from typing import Annotated
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    api_host: str = "localhost"
+    db_host: str = "localhost"
+    postgres_db: str = "dias"
+    postgres_user: str = "dias"
+    postgres_password: str = "abc123"
+    api_token: str = "token"
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+
+@lru_cache
+def get_settings():
+    return Settings()
+
+
+settings: Annotated[Settings, Depends(get_settings)] = get_settings()
 
 
 def get_postgres_uri() -> str:
-    host = os.environ.get("DB_HOST", "localhost")
-    port = 5432 if host == "localhost" else 5432
-    password = os.environ.get("POSTGRES_PASSWORD", "abc123")
-    user = os.environ.get("POSTGRES_USER", "postgres")
-    db_name = os.environ.get("POSTGRES_DB", "postgres")
-    return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{db_name}"
+    port = 5432 if settings.db_host == "localhost" else 5432
+    return (
+        f"postgresql+asyncpg://{settings.postgres_user}:"
+        f"{settings.postgres_password}@{settings.db_host}:"
+        f"{port}/{settings.postgres_db}"
+    )
 
 
 def get_api_url() -> str:
-    host = os.environ.get("API_HOST", "localhost")
-    port = 8000 if host == "localhost" else 80
-    return f"http://{host}:{port}"
+    port = 8000 if settings.api_host == "localhost" else 80
+    return f"http://{settings.api_host}:{port}/api/concurrency_conversion"
 
 
 def get_exchangerate_api_url() -> str:
-    api_token = os.environ.get("API_TOKEN")
     url = "https://v6.exchangerate-api.com/v6/{}/latest/"
-    return url.format(api_token)
+    return url.format(settings.api_token)
