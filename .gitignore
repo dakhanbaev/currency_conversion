@@ -134,4 +134,3 @@ dmypy.json
 docker-compose-local.yaml
 docker-compose-local.yml
 plan.txt
-requirements.txt
