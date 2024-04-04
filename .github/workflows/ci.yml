@@ -16,18 +16,24 @@ jobs:
       with:
         python-version: 3.11
 
+    - name: Install Poetry
+      run: |
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+        source $HOME/.poetry/env
+      shell: bash
+
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        poetry install
+      working-directory: ${{ github.workspace }}
 
     - name: pre-commit
-      run: pre-commit run --all-files
+      run: poetry run pre-commit run --all-files
 
     - name: Run tests
-      run: pytest tests/unit tests/integration
+      run: poetry run pytest tests/unit tests/integration
 
     - name: Measure code coverage
       run: |
-        coverage run -m pytest tests/unit tests/integration
-        coverage report -m
+        poetry run coverage run -m pytest tests/unit tests/integration
+        poetry run coverage report -m
