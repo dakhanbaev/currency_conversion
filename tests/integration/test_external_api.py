@@ -10,6 +10,9 @@ import src.config as _config
 class FakeClientSession:
     response = None
 
+    def __init__(self, timeout):
+        self.timeout = timeout
+
     async def __aenter__(self):
         return self
 

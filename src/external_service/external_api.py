@@ -1,7 +1,7 @@
 import abc
 import logging
 from functools import reduce
-from aiohttp import ClientSession, ClientResponse, client_exceptions
+from aiohttp import ClientSession, ClientResponse, client_exceptions, ClientTimeout
 from fastapi import status, HTTPException
 
 from src.config import get_exchangerate_api_url
@@ -30,8 +30,9 @@ class ExchangeRateApi:
     API_URL = get_exchangerate_api_url()
     client_session = ClientSession
 
-    async def _get_exchange_rates(self, url: str) -> dict:
-        async with self.client_session() as session:
+    async def _get_exchange_rates(self, url: str, timeout: int = 10) -> dict:
+        timeout_obj = ClientTimeout(total=timeout)
+        async with self.client_session(timeout=timeout_obj) as session:
             async with session.get(url) as response:
                 return await self._parse_response(response)
 

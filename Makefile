@@ -1,6 +1,6 @@
 # Makefile
 
-.PHONY: run down log restart coverage report pre-commit
+.PHONY: run down log restart coverage report pre-commit bandit
 
 run:
 	docker-compose -f docker-compose.yml up -d --build
@@ -17,3 +17,5 @@ report:
 	coverage html
 pre-commit:
 	pre-commit run --all-files
+bandit:
+	bandit --configfile pyproject.toml -r src tests
