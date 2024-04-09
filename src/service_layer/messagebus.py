@@ -34,7 +34,7 @@ class MessageBus:
             if not isinstance(result, Iterable) or isinstance(result, str):
                 result = [result]
 
-            results.extend(v for v in result if v is not None)
+            results.extend(value for value in result if value is not None)
 
         if results:
             return results[0]

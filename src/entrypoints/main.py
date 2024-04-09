@@ -9,11 +9,15 @@ bus = bootstrap.bootstrap()
 app = FastAPI(root_path="/api/concurrency_conversion")
 
 
-@app.get("/update/{name}", status_code=status.HTTP_200_OK)
+@app.get(
+    "/update/{name}",
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.ResultSchema,
+)
 async def update_exchange_rates(name: str):
     cmd = messages.UpdateExchangeRates(name)
     await bus.handle(cmd)
-    return {"result": "Updated successfully"}
+    return schemas.ResultSchema(result="Updated successfully")
 
 
 @app.get(
@@ -28,7 +32,11 @@ async def last_update(name: str) -> schemas.CurrencyGET:
     return schemas.CurrencyGET(**result)
 
 
-@app.post("/convert", status_code=status.HTTP_200_OK)
+@app.post(
+    "/convert",
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.ResultSchema,
+)
 async def convert_currency(request: schemas.CurrencyConversionRequest):
     cmd = messages.ConvertCurrency(
         request.source_currency,
@@ -36,7 +44,7 @@ async def convert_currency(request: schemas.CurrencyConversionRequest):
         request.amount,
     )
     result = await bus.handle(cmd)
-    return {"result": result}
+    return schemas.ResultSchema(result=result)
 
 
 if __name__ == "__main__":

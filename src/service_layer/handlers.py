@@ -43,7 +43,7 @@ async def convert_currency(
     convert: messages.ConvertCurrency,
     uow: unit_of_work.SqlAlchemyUnitOfWork,
     api: external_api.ExchangeRateApi,
-):
+) -> float:
     async with uow:
         if (currency := await uow.currencies.get(name=convert.source_currency)) is None:
             await update_rate(
