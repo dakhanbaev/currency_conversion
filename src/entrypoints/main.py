@@ -1,4 +1,5 @@
 import uvicorn
+import logging
 from fastapi import FastAPI, HTTPException, status
 from src import bootstrap
 from src.entrypoints import schemas, views
@@ -7,6 +8,7 @@ from src.domain import messages
 bus = bootstrap.bootstrap()
 
 app = FastAPI(root_path="/api/concurrency_conversion")
+logger = logging.getLogger(__name__)
 
 
 @app.get(
@@ -17,6 +19,7 @@ app = FastAPI(root_path="/api/concurrency_conversion")
 async def update_exchange_rates(name: str):
     cmd = messages.UpdateExchangeRates(name)
     await bus.handle(cmd)
+    logger.info(f"currency {name}: Updated successfully")
     return schemas.ResultSchema(result="Updated successfully")
 
 
@@ -28,6 +31,7 @@ async def update_exchange_rates(name: str):
 async def last_update(name: str) -> schemas.CurrencyGET:
     result = await views.currencies(name, uow=bus.uow)
     if not result:
+        logger.error(f"Not result for currency: {name}")
         raise HTTPException(status_code=404, detail="not found")
     return schemas.CurrencyGET(**result)
 
@@ -44,8 +48,13 @@ async def convert_currency(request: schemas.CurrencyConversionRequest):
         request.amount,
     )
     result = await bus.handle(cmd)
+    logger.info(
+        f"Convert result for {request.source_currency} -> "
+        f"{request.target_currency} : {result}"
+    )
     return schemas.ResultSchema(result=result)
 
 
 if __name__ == "__main__":
+    # For debugging
     uvicorn.run(app, host="0.0.0.0", port=8000)

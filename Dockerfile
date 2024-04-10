@@ -25,6 +25,7 @@ COPY tests tests
 COPY alembic alembic
 COPY alembic.ini .
 COPY entrypoint.sh .
+COPY log_conf.yaml .
 
 RUN chmod +x entrypoint.sh
 
