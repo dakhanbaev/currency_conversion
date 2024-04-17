@@ -41,16 +41,16 @@ async def last_update(name: str) -> schemas.CurrencyGET:
     status_code=status.HTTP_200_OK,
     response_model=schemas.ResultSchema,
 )
-async def convert_currency(request: schemas.CurrencyConversionRequest):
+async def convert_currency(convert: schemas.CurrencyConversionRequest):
     cmd = messages.ConvertCurrency(
-        request.source_currency,
-        request.target_currency,
-        request.amount,
+        convert.source_currency,
+        convert.target_currency,
+        convert.amount,
     )
     result = await bus.handle(cmd)
     logger.info(
-        f"Convert result for {request.source_currency} -> "
-        f"{request.target_currency} : {result}"
+        f"Convert result for {convert.source_currency} -> "
+        f"{convert.target_currency} : {result}"
     )
     return schemas.ResultSchema(result=result)
 

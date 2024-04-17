@@ -22,22 +22,22 @@ class CurrencyConversionRequest(BaseModel):
     target_currency: str
     amount: float
 
-    @classmethod
     @field_validator("source_currency")
+    @classmethod
     def validate_source_currency(cls, source_currency):
         if source_currency is None or source_currency == "":
             raise ValueError("source_currency cannot be None or empty")
         return source_currency
 
-    @classmethod
     @field_validator("target_currency")
+    @classmethod
     def validate_target_currency(cls, target_currency):
         if target_currency is None or target_currency == "":
             raise ValueError("target_currency cannot be None or empty")
         return target_currency
 
-    @classmethod
     @field_validator("amount")
+    @classmethod
     def validate_amount(cls, amount):
         if amount is None or amount <= 0:
             raise ValueError("amount cannot be None or amount <= 0")

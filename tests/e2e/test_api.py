@@ -32,6 +32,17 @@ def test_get_update():
 def test_post_to_convert():
     result = api_client.post_to_convert("USD", "EUR", 100)
     assert result.get("result")
+
+
+@pytest.mark.parametrize(
+    "body, status_code",
+    [
+        (["", "USD", 100], status.HTTP_422_UNPROCESSABLE_ENTITY),
+        (["USD", "", 100], status.HTTP_422_UNPROCESSABLE_ENTITY),
+        (["KZT", "USD", 0], status.HTTP_422_UNPROCESSABLE_ENTITY),
+    ],
+)
+def test_post_to_convert_not_correct_arg(body, status_code):
     with pytest.raises(requests.exceptions.HTTPError) as exc:
         api_client.post_to_convert("", "", 0)
-    assert exc.value.response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert exc.value.response.status_code == status_code
