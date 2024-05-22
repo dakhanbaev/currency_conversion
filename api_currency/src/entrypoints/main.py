@@ -50,8 +50,7 @@ async def convert_currency(convert: schemas.CurrencyConversionRequest):
     )
     result = await bus.handle(cmd)
     logger.info(
-        f"Convert result for {convert.source_currency} -> "
-        f"{convert.target_currency} : {result}"
+        f"Convert result for {convert.source_currency} -> " f"{convert.target_currency} : {result}"
     )
     return schemas.ResultSchema(result=result)
 

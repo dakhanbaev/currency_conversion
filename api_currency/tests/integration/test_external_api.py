@@ -41,9 +41,7 @@ class FakeClientResponse:
 
     async def json(self):
         if self.raise_json:
-            raise client_exceptions.ContentTypeError(
-                "This is a ContentTypeError", history=()
-            )
+            raise client_exceptions.ContentTypeError("This is a ContentTypeError", history=())
         return self.content
 
     def raise_for_status(self):
@@ -102,9 +100,7 @@ class TestExchangeRateApi:
         assert len(result) == 0
 
     @pytest.mark.asyncio
-    async def test_request_handler_raise_for_status(
-        self, exchange_rate_api, get_session
-    ):
+    async def test_request_handler_raise_for_status(self, exchange_rate_api, get_session):
         get_session.response = partial(
             FakeClientResponse,
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -120,9 +116,7 @@ class TestExchangeRateApi:
         assert exc.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
     @pytest.mark.asyncio
-    async def test_request_handler_not_implemented(
-        self, exchange_rate_api, get_session
-    ):
+    async def test_request_handler_not_implemented(self, exchange_rate_api, get_session):
         get_session.response = partial(
             FakeClientResponse,
             status=status.HTTP_501_NOT_IMPLEMENTED,

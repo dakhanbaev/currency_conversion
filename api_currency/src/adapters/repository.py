@@ -54,9 +54,7 @@ class SqlAlchemyRepository(AbstractRepository):
 
     async def delete(self, currency_id: int):
         await self.session.execute(
-            delete(model.ConversionRate).where(
-                orm.conversion_rates.c.currency_id == currency_id
-            )
+            delete(model.ConversionRate).where(orm.conversion_rates.c.currency_id == currency_id)
         )
 
     async def get_rate(self, currency_id: int, rate_code: str) -> model.ConversionRate:

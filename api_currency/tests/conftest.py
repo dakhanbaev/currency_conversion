@@ -39,9 +39,7 @@ async def create_db(in_memory_sqlite_db):
 
 @pytest.fixture
 def sqlite_session_factory(in_memory_sqlite_db, create_db):
-    yield sessionmaker(
-        bind=in_memory_sqlite_db, expire_on_commit=False, class_=AsyncSession
-    )
+    yield sessionmaker(bind=in_memory_sqlite_db, expire_on_commit=False, class_=AsyncSession)
 
 
 @pytest.fixture

@@ -63,9 +63,7 @@ class FakeEvent:
 
 
 def bootstrap_test_app():
-    return bootstrap.bootstrap(
-        start_orm=False, uow=FakeUnitOfWork(), api=FakeExchangeRateApi()
-    )
+    return bootstrap.bootstrap(start_orm=False, uow=FakeUnitOfWork(), api=FakeExchangeRateApi())
 
 
 class TestUpdateExchangeRates:
@@ -94,9 +92,7 @@ class TestConvertCurrency:
     async def test_convert_currency(self):
         bus = bootstrap_test_app()
         result = await bus.handle(
-            messages.ConvertCurrency(
-                source_currency="BTS", target_currency="USD", amount=100
-            )
+            messages.ConvertCurrency(source_currency="BTS", target_currency="USD", amount=100)
         )
         assert result is not None
         assert result == 100
@@ -107,9 +103,7 @@ class TestConvertCurrency:
 
         with pytest.raises(HTTPException) as exc:
             await bus.handle(
-                messages.ConvertCurrency(
-                    source_currency="BTS", target_currency="BTS", amount=100
-                )
+                messages.ConvertCurrency(source_currency="BTS", target_currency="BTS", amount=100)
             )
         assert isinstance(exc.value, HTTPException)
         assert exc.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
