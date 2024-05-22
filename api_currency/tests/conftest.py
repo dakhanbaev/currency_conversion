@@ -5,7 +5,7 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.adapters.orm import metadata, start_mappers
+from adapters.orm import metadata, start_mappers
 
 pytest.register_assert_rewrite("tests.e2e.api_client")
 

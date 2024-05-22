@@ -11,7 +11,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import registry, relationship
 
-from src.domain import model
+from domain import model
 
 logger = logging.getLogger(__name__)
 

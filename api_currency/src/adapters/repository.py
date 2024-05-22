@@ -1,8 +1,8 @@
 import abc
 from typing import Set
 
-from src.adapters import orm
-from src.domain import model
+from adapters import orm
+from domain import model
 from sqlalchemy import select, delete, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 

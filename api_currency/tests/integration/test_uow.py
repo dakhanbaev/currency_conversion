@@ -1,8 +1,8 @@
 import pytest
 from sqlalchemy.sql import text
 
-from src.service_layer import unit_of_work
-from src.domain import model
+from service_layer import unit_of_work
+from domain import model
 
 
 async def get_currency(session, name):

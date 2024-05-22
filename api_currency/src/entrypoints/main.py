@@ -1,9 +1,10 @@
 import uvicorn
 import logging
 from fastapi import FastAPI, HTTPException, status
-from src import bootstrap
-from src.entrypoints import schemas, views
-from src.domain import messages
+import bootstrap
+from entrypoints import views
+from entrypoints import schemas
+from domain import messages
 
 bus = bootstrap.bootstrap()
 

@@ -1,7 +1,7 @@
 import inspect
-from src.adapters import orm
-from src.service_layer import handlers, messagebus, unit_of_work
-from src.external_service import external_api
+from adapters import orm
+from service_layer import unit_of_work, messagebus, handlers
+from external_service import external_api
 
 
 def bootstrap(

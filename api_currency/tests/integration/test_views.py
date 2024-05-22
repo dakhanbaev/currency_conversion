@@ -1,10 +1,10 @@
 # pylint: disable=redefined-outer-name
 import pytest
-from src import bootstrap
-from src.entrypoints import views
-from src.service_layer import unit_of_work
-from src.external_service import external_api
-from src.domain import messages
+import bootstrap
+from entrypoints import views
+from service_layer import unit_of_work
+from external_service import external_api
+from domain import messages
 
 
 class FakeExchangeRateApi(external_api.ExternalApi):

@@ -1,4 +1,4 @@
-from src.domain import model
+from domain import model
 
 
 def test_models_init():

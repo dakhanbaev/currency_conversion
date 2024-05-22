@@ -20,9 +20,9 @@ ENV VIRTUAL_ENV=/.venv \
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-COPY src src
-COPY tests tests
-COPY alembic alembic
+COPY currency_api src
+COPY currency_api tests
+COPY currency_api alembic
 COPY alembic.ini .
 COPY entrypoint.sh .
 COPY log_conf.yaml .

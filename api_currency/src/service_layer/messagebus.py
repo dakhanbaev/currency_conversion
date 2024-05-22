@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Callable, Dict, List, Type, Iterable
 
 from fastapi import HTTPException, status
-from src.domain import messages
+from domain import messages
 
 if TYPE_CHECKING:
     from . import unit_of_work

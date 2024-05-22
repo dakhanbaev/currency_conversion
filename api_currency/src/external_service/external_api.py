@@ -4,7 +4,7 @@ from functools import reduce
 from aiohttp import ClientSession, ClientResponse, client_exceptions, ClientTimeout
 from fastapi import status, HTTPException
 
-from src.config import get_exchangerate_api_url
+from api_gateway import get_exchangerate_api_url
 
 
 logger = logging.getLogger(__name__)

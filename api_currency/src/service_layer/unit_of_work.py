@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import abc
 
-from src import config
-from src.adapters import repository
+import api_gateway
+from adapters import repository
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -36,7 +36,7 @@ class AbstractUnitOfWork(abc.ABC):
 
 DEFAULT_SESSION_FACTORY = sessionmaker(
     bind=create_async_engine(
-        config.get_postgres_uri(),
+        api_gateway.get_postgres_uri(),
         isolation_level="REPEATABLE READ",
         future=True,
         echo=True,

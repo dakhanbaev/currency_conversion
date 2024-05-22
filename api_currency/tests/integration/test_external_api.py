@@ -3,8 +3,8 @@ from functools import partial
 import pytest
 from aiohttp import client_exceptions, ClientSession
 from fastapi import status, HTTPException
-from src.external_service.external_api import ExchangeRateApi, get_client_session
-import src.config as _config
+from external_service.external_api import ExchangeRateApi, get_client_session
+import api_gateway as _config
 
 
 class FakeClientSession:

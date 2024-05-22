@@ -1,10 +1,10 @@
 import pytest
 from fastapi import HTTPException, status
-from src.adapters import repository
-from src.service_layer import unit_of_work
-from src.external_service import external_api
-from src.domain import messages
-from src import bootstrap
+from adapters import repository
+from service_layer import unit_of_work
+from external_service import external_api
+from domain import messages
+import bootstrap
 
 
 class FakeRepository(repository.AbstractRepository):

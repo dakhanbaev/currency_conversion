@@ -4,8 +4,8 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING
 
-from src.domain import messages, model
-from src.external_service import external_api
+from domain import messages, model
+from external_service import external_api
 
 
 if TYPE_CHECKING:

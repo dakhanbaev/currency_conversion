@@ -1,6 +1,6 @@
 import requests
 from fastapi import status
-from src import config as _config
+import api_gateway as _config
 
 
 def get_update(name):

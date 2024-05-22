@@ -1,6 +1,6 @@
 import pytest
-from src.adapters import repository
-from src.domain import model
+from adapters import repository
+from domain import model
 
 
 class TestSqlAlchemyRepository:
