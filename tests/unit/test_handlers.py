@@ -2,7 +2,7 @@ import pytest
 from fastapi import HTTPException, status
 from src.adapters import repository
 from src.service_layer import unit_of_work
-from src.external_service import external_api
+from src.tasks import external_api
 from src.domain import messages
 from src import bootstrap
 

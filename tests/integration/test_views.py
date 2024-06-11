@@ -3,7 +3,7 @@ import pytest
 from src import bootstrap
 from src.entrypoints import views
 from src.service_layer import unit_of_work
-from src.external_service import external_api
+from src.tasks import external_api
 from src.domain import messages
 
 

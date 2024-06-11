@@ -1,60 +1,53 @@
 import uvicorn
 import logging
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, UploadFile, File
 from src import bootstrap
 from src.entrypoints import schemas, views
 from src.domain import messages
 
 bus = bootstrap.bootstrap()
 
-app = FastAPI(root_path="/api/concurrency_conversion")
+app = FastAPI(root_path='/api')
 logger = logging.getLogger(__name__)
 
 
-@app.get(
-    "/update/{name}",
-    status_code=status.HTTP_200_OK,
-    response_model=schemas.ResultSchema,
+@app.delete(
+    '/analysis/{request_id}',
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=schemas.Analysis,
 )
-async def update_exchange_rates(name: str):
-    cmd = messages.UpdateExchangeRates(name)
+async def delete_analysis(request_id: str):
+    cmd = messages.DeleteAnalyse(request_id)
     await bus.handle(cmd)
-    logger.info(f"currency {name}: Updated successfully")
-    return schemas.ResultSchema(result="Updated successfully")
+    logger.info(f'currency {request_id}: Deleted successfully')
+    return schemas.ResultSchema(result='Deleted successfully')
 
 
 @app.get(
-    "/last_update/{name}",
+    '/analysis/{request_id}',
     status_code=status.HTTP_200_OK,
-    response_model=schemas.CurrencyGET,
+    response_model=schemas.Analysis,
 )
-async def last_update(name: str) -> schemas.CurrencyGET:
-    result = await views.currencies(name, uow=bus.uow)
+async def get_analysis(request_id: str) -> schemas.CurrencyGET:
+    result = await views.currencies(request_id, uow=bus.uow)
     if not result:
-        logger.error(f"Not result for currency: {name}")
-        raise HTTPException(status_code=404, detail="not found")
+        logger.error(f'Not result for request_id : {request_id}')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='not found')
     return schemas.CurrencyGET(**result)
 
 
 @app.post(
-    "/convert",
-    status_code=status.HTTP_200_OK,
-    response_model=schemas.ResultSchema,
+    '/analysis',
+    status_code=status.HTTP_201_CREATED,
 )
-async def convert_currency(convert: schemas.CurrencyConversionRequest):
-    cmd = messages.ConvertCurrency(
-        convert.source_currency,
-        convert.target_currency,
-        convert.amount,
+async def post_analysis(file: UploadFile = File(...)):
+    cmd = messages.SaveAnalyse(
+        file
     )
-    result = await bus.handle(cmd)
-    logger.info(
-        f"Convert result for {convert.source_currency} -> "
-        f"{convert.target_currency} : {result}"
-    )
-    return schemas.ResultSchema(result=result)
+    request_id = await bus.handle(cmd)
+    return schemas.ResultSchema(result='OK')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # For debugging
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host='0.0.0.0', port=8000)

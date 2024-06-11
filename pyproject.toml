@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "currency-conversion"
+name = "currency_conversion"
 version = "0.1.0"
 description = "currency_conversion"
 authors = ["dias <@d.akhanbayev >"]
@@ -78,6 +78,8 @@ watchfiles = "^0.21.0"
 websockets = "^12.0"
 yarl = "^1.9.4"
 bandit = "^1.7.8"
+celery = "^5.4.0"
+redis = "^5.0.5"
 
 
 [build-system]

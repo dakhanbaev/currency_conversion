@@ -5,7 +5,7 @@ import datetime
 from typing import TYPE_CHECKING
 
 from src.domain import messages, model
-from src.external_service import external_api
+from src.tasks import external_api
 
 
 if TYPE_CHECKING:
@@ -39,10 +39,9 @@ async def update_rate(
         await uow.commit()
 
 
-async def convert_currency(
-    convert: messages.ConvertCurrency,
+async def delete_analyse(
+    analyse: messages.DeleteAnalyse,
     uow: unit_of_work.SqlAlchemyUnitOfWork,
-    api: external_api.ExchangeRateApi,
 ) -> float:
     async with uow:
         if (currency := await uow.currencies.get(name=convert.source_currency)) is None:
@@ -63,8 +62,7 @@ async def check_events(check: messages.CheckEvent):
 
 
 COMMAND_HANDLERS = {
-    messages.UpdateExchangeRates: update_rate,
-    messages.ConvertCurrency: convert_currency,
+    messages.DeleteAnalyse: delete_analyse,
 }
 
 EVENT_HANDLERS = {messages.CheckEvent: [check_events]}

@@ -1,19 +1,18 @@
 import inspect
 from src.adapters import orm
 from src.service_layer import handlers, messagebus, unit_of_work
-from src.external_service import external_api
+from src.tasks import tasks
 
 
 def bootstrap(
     start_orm: bool = True,
     uow: unit_of_work.AbstractUnitOfWork = unit_of_work.SqlAlchemyUnitOfWork(),
-    api: external_api.ExternalApi = external_api.ExchangeRateApi(),
 ) -> messagebus.MessageBus:
 
     if start_orm:
         orm.start_mappers()
 
-    dependencies = {"uow": uow, "api": api}
+    dependencies = {'uow': uow,}
     injected_event_handlers = {
         event_type: [
             inject_dependencies(handler, dependencies) for handler in event_handlers
@@ -24,11 +23,16 @@ def bootstrap(
         command_type: inject_dependencies(handler, dependencies)
         for command_type, handler in handlers.COMMAND_HANDLERS.items()
     }
+    injected_task_handlers = {
+        task_type: task_handler()
+        for task_type, task_handler in tasks.TASK_HANDLERS.items()
+    }
 
     return messagebus.MessageBus(
         uow=uow,
         event_handlers=injected_event_handlers,
         command_handlers=injected_command_handlers,
+        task_handlers=injected_task_handlers,
     )
 
 

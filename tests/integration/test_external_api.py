@@ -3,7 +3,7 @@ from functools import partial
 import pytest
 from aiohttp import client_exceptions, ClientSession
 from fastapi import status, HTTPException
-from src.external_service.external_api import ExchangeRateApi, get_client_session
+from src.tasks.external_api import ExchangeRateApi, get_client_session
 import src.config as _config
 
 
