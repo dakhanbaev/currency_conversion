@@ -8,14 +8,14 @@ class Command:
 
 
 @dataclass
-class UpdateExchangeRates(Command):
+class CreateUser(Command):
     name: str
 
 
 @dataclass
-class ConvertCurrency(Command):
-    source_currency: str
-    target_currency: str
+class AddTransaction(Command):
+    user_id: int
+    transaction_type: str
     amount: float
 
 

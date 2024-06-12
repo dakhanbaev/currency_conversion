@@ -1,48 +1,27 @@
-import pytest
-import requests
-from fastapi import status
+from datetime import datetime
 from tests.e2e import api_client
 
 
-@pytest.mark.parametrize(
-    "name, response",
-    [("USD", "USD"), ("EUR", "EUR")],
-)
-def test_get_last_update(name, response):
-    r = api_client.get_last_update(name)
-    r.raise_for_status()
-    assert r.status_code == status.HTTP_200_OK
-    assert r.ok
-    result = r.json()
-    assert result.get("last_update", None)
-    assert result["name"] == name
+def test_all_requests():
+    user = api_client.post_user('dias')
+    assert user['id'] == 1
+    assert user['name'] == 'dias'
 
+    new_transaction = api_client.post_transaction(
+        user['id'], 'DEPOSIT', 10.0)
+    timestamp = new_transaction['timestamp']
+    del new_transaction['timestamp']
+    assert new_transaction['amount'] == 10.0
+    assert new_transaction['transaction_type'] == 'DEPOSIT'
+    assert new_transaction['user_id'] == user['id']
 
-def test_get_update():
-    name = "USD"
-    r = api_client.get_last_update(name)
-    first_last_update = r.json()["last_update"]
-    api_client.get_update(name)
-    r = api_client.get_last_update(name)
-    second_last_update = r.json()["last_update"]
+    transaction = api_client.get_transaction(new_transaction['id'])
+    del transaction['timestamp']
+    assert transaction == new_transaction
 
-    assert first_last_update != second_last_update
+    timestamp = datetime.fromisoformat(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+    balance = api_client.get_balance(user['id'], timestamp)
 
+    del balance['created']
+    assert balance['user_id'] == 1
 
-def test_post_to_convert():
-    result = api_client.post_to_convert("USD", "EUR", 100)
-    assert result.get("result")
-
-
-@pytest.mark.parametrize(
-    "body, status_code",
-    [
-        (["", "USD", 100], status.HTTP_422_UNPROCESSABLE_ENTITY),
-        (["USD", "", 100], status.HTTP_422_UNPROCESSABLE_ENTITY),
-        (["KZT", "USD", 0], status.HTTP_422_UNPROCESSABLE_ENTITY),
-    ],
-)
-def test_post_to_convert_not_correct_arg(body, status_code):
-    with pytest.raises(requests.exceptions.HTTPError) as exc:
-        api_client.post_to_convert("", "", 0)
-    assert exc.value.response.status_code == status_code

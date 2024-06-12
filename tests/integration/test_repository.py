@@ -7,36 +7,18 @@ class TestSqlAlchemyRepository:
     @pytest.fixture
     async def setup(self, session):
         repo = repository.SqlAlchemyRepository(session)
-        rate1 = model.ConversionRate(code="USD", rate=10.5)
-        rate2 = model.ConversionRate(code="EUR", rate=20.8)
-        currency = model.Currency(name="USD", rates=[rate1, rate2])
-        await repo.add(currency)
-        return repo, currency
+        transaction1 = model.Transaction(transaction_type=model.TransactionType.DEPOSIT.value, amount=10.5)
+        transaction2 = model.Transaction(transaction_type=model.TransactionType.WITHDRAW.value, amount=20.5)
+        user = model.User(name='Dias', transactions=[transaction1, transaction2], balances=[])
+        await repo.add(user)
+        return repo, user
 
     @pytest.mark.asyncio
-    async def test_get_rate(self, setup):
-        repo, currency = await setup
+    async def test_get_user(self, setup):
+        repo, new_user = await setup
 
-        currency = await repo.get("USD")
-        result = await repo.get_rate(currency_id=currency.id, rate_code="USD")
-        result2 = await repo.get_rate(currency_id=currency.id, rate_code="EUR")
+        user = await repo.get('Dias')
 
-        assert result == currency.rates[0]
-        assert result2 == currency.rates[1]
+        assert user == new_user
+        assert len(user.transactions) == 2
 
-    @pytest.mark.asyncio
-    async def test_delete(self, setup):
-        repo, currency = await setup
-        currency = await repo.get("USD")
-
-        await repo.delete(currency_id=currency.id)
-        await repo.session.commit()
-        result = await repo.get_rate(currency_id=currency.id, rate_code="USD")
-        result2 = await repo.get_rate(currency_id=currency.id, rate_code="EUR")
-
-        repo.session.expunge_all()
-
-        cur = await repo.get("USD")
-        assert cur.rates == []
-        assert result is None
-        assert result2 is None

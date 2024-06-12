@@ -1,11 +1,9 @@
 # pylint: disable=unused-argument
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING
 
 from src.domain import messages, model
-from src.external_service import external_api
 
 
 if TYPE_CHECKING:
@@ -13,49 +11,52 @@ if TYPE_CHECKING:
     import unit_of_work
 
 
-class InvalidCode(Exception):
-    pass
-
-
-async def update_rate(
-    currency_name: messages.UpdateExchangeRates,
+async def create_user(
+    user_name: messages.CreateUser,
     uow: unit_of_work.SqlAlchemyUnitOfWork,
-    api: external_api.ExchangeRateApi,
-):
+) -> model.User:
     async with uow:
-        if (currency := await uow.currencies.get(name=currency_name.name)) is None:
-            currency = model.Currency(
-                name=currency_name.name,
-                rates=[],
+        if (user := await uow.users.get(name=user_name.name)) is None:
+            user = model.User(
+                name=user_name.name,
+                transactions=[],
+                balances=[],
             )
-            await uow.currencies.add(currency)
-        else:
-            await uow.currencies.delete(currency_id=currency.id)
-        rates = await api.get_all_rates(code=currency_name.name)
-        currency.rates.extend(
-            [model.ConversionRate(code=code, rate=rate) for code, rate in rates.items()]
-        )
-        currency.last_update = datetime.datetime.now()
+            await uow.users.add(user)
         await uow.commit()
+        return user
 
 
-async def convert_currency(
-    convert: messages.ConvertCurrency,
+async def add_transaction(
+    transaction: messages.AddTransaction,
     uow: unit_of_work.SqlAlchemyUnitOfWork,
-    api: external_api.ExchangeRateApi,
-) -> float:
+) -> model.Transaction:
     async with uow:
-        if (currency := await uow.currencies.get(name=convert.source_currency)) is None:
-            await update_rate(
-                messages.UpdateExchangeRates(name=convert.source_currency),
-                uow=uow,
-                api=api,
+        if (user := await uow.users.get(user_id=transaction.user_id)) is None:
+            raise Exception(f'No user with id : {transaction.user_id}')
+
+        if transaction.transaction_type == model.TransactionType.WITHDRAW.value:
+            if (total_balance := user.balance - transaction.amount) < 0:
+                raise Exception(f'Can not create transaction with this amount : {transaction.amount}')
+        elif transaction.transaction_type == model.TransactionType.DEPOSIT.value:
+            total_balance = user.balance + transaction.amount
+        else:
+            raise Exception(f'Unexpected transaction type : {transaction.transaction_type}')
+
+        user.balance = total_balance
+        new_transaction = model.Transaction(
+                transaction_type=transaction.transaction_type,
+                amount=transaction.amount,
             )
-            currency = await uow.currencies.get(name=convert.source_currency)
-        conversion_rate = await uow.currencies.get_rate(
-            currency_id=currency.id, rate_code=convert.target_currency
+        balance = model.Balance(
+            total=total_balance
         )
-        return convert.amount * conversion_rate.rate
+
+        user.transactions.append(new_transaction)
+        user.balances.append(balance)
+
+        await uow.commit()
+        return new_transaction
 
 
 async def check_events(check: messages.CheckEvent):
@@ -63,8 +64,8 @@ async def check_events(check: messages.CheckEvent):
 
 
 COMMAND_HANDLERS = {
-    messages.UpdateExchangeRates: update_rate,
-    messages.ConvertCurrency: convert_currency,
+    messages.CreateUser: create_user,
+    messages.AddTransaction: add_transaction,
 }
 
 EVENT_HANDLERS = {messages.CheckEvent: [check_events]}

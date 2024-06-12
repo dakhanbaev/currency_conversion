@@ -1,39 +1,30 @@
 import abc
 from typing import Set
 
-from src.adapters import orm
 from src.domain import model
-from sqlalchemy import select, delete, and_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class AbstractRepository(abc.ABC):
     def __init__(self):
-        self.seen: Set[model.Currency] = set()
+        self.seen: Set[model.User] = set()
 
-    async def add(self, currency: model.Currency):
-        await self._add(currency)
-        self.seen.add(currency)
+    async def add(self, user: model.User):
+        await self._add(user)
+        self.seen.add(user)
 
-    async def get(self, name) -> model.Currency:
-        if currency := await self._get(name):
-            self.seen.add(currency)
-        return currency
+    async def get(self, name: str = None, user_id: int = None) -> model.User:
+        if user := await self._get(name, user_id):
+            self.seen.add(user)
+        return user
 
     @abc.abstractmethod
-    async def _add(self, rates: model.Currency):
+    async def _add(self, user: model.User):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def _get(self, name) -> model.Currency:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def delete(self, currency_id: int):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def get_rate(self, currency_id: int, rate_code: str):
+    async def _get(self, name: str, user_id: int) -> model.User:
         raise NotImplementedError
 
 
@@ -42,35 +33,20 @@ class SqlAlchemyRepository(AbstractRepository):
         super().__init__()
         self.session = session
 
-    async def _add(self, currency: model.Currency):
-        self.session.add(currency)
+    async def _add(self, user: model.User):
+        self.session.add(user)
 
-    async def _get(self, name: str) -> model.Currency:
-        return (
-            (await self.session.execute(select(model.Currency).filter_by(name=name)))
-            .scalars()
-            .one_or_none()
-        )
-
-    async def delete(self, currency_id: int):
-        await self.session.execute(
-            delete(model.ConversionRate).where(
-                orm.conversion_rates.c.currency_id == currency_id
+    async def _get(self, name: str = None, user_id: int = None) -> model.User:
+        if name:
+            return (
+                (await self.session.execute(select(model.User).filter_by(name=name)))
+                .scalars()
+                .one_or_none()
             )
-        )
-
-    async def get_rate(self, currency_id: int, rate_code: str) -> model.ConversionRate:
-        return (
-            (
-                await self.session.execute(
-                    select(model.ConversionRate).where(
-                        and_(
-                            orm.conversion_rates.c.currency_id == currency_id,
-                            orm.conversion_rates.c.code == rate_code,
-                        )
-                    )
-                )
+        else:
+            return (
+                (await self.session.execute(select(model.User).filter_by(id=user_id)))
+                .scalars()
+                .one_or_none()
             )
-            .scalars()
-            .one_or_none()
-        )
+

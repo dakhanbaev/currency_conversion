@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 
 
 class AbstractUnitOfWork(abc.ABC):
-    currencies: repository.AbstractRepository
+    users: repository.AbstractRepository
 
     async def __aenter__(self) -> AbstractUnitOfWork:
         return self
@@ -52,7 +52,7 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
 
     async def __aenter__(self):
         self.session: AsyncSession = self.session_factory()
-        self.currencies = repository.SqlAlchemyRepository(self.session)
+        self.users = repository.SqlAlchemyRepository(self.session)
         return await super().__aenter__()
 
     async def __aexit__(self, *args):
