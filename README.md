@@ -1,4 +1,4 @@
-# Currency Conversion API
+# Content Analysis Service
 
 
 - [Installation](#installation)
@@ -21,10 +21,6 @@
 
 3. Create a `.env` file in the root of the project and set the required environment variables. You can use the provided `env-file` as a template.
 
-    ```plaintext
-    API_TOKEN=your-exchange-api-token
-    ```
-   to get API_TOKEN visit : [ExchangeRateAPI](https://www.exchangerate-api.com/)
 
 
 4. Build and run the Docker containers:
@@ -39,20 +35,28 @@ This will build the project and start the Docker containers. Other container com
 - API is built using [FastAPI](https://fastapi.tiangolo.com/).
 
 
-- Get Last Update
+- Run analyze task
    ```bash
-   curl http://localhost:8000/api/concurrency_conversion/last_update/{currency_name}
+    curl -X POST \
+     -F "file=image.jpeg" \
+     -F "description=Some description" \
+     http://localhost:8000/analysis
+    ```
+
+- Get analyze result
+   ```bash
+   curl http://localhost:8000/api/analysis/{request_id}
+   ```
+  
+- Get analyze result with frame number for video
+   ```bash
+   curl http://localhost:8000/api/analysis/{request_id}/{frame}
    ```
 
-- Update Currency
+- Delete analyze result
    ```bash
-   curl http://localhost:8000/api/concurrency_conversion/update/{currency_name}
-   ```
-
-- Convert Currency
-   ```bash
-   curl -X POST -H "Content-Type: application/json" -d '{"source_currency": "USD", "target_currency": "EUR", "amount": 100}' http://localhost:8000/api/concurrency_conversion/convert
-   ```
+   curl -X DELETE http://localhost:8000/api/analysis/{request_id}
+  ```
 
 ## Run Tests
 
