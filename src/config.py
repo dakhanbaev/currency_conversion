@@ -11,10 +11,10 @@ class Settings(BaseSettings):
     postgres_user: str = 'dias'
     postgres_password: str = 'abc123'
     api_token: str = 'token'
-    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
     redis_host: str = 'localhost'
     redis_port: int = 6379
     redis_db: int = 0
+    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
 
 @lru_cache

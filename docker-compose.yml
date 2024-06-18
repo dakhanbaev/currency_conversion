@@ -4,11 +4,16 @@ services:
   api:
     image: api
     container_name: api
+    volumes:
+      - shared-data:/src/uploads
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       - DB_HOST=db
+      - REDIS_HOST=redis
     env_file:
       - .env
     build:
@@ -32,3 +37,36 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  redis:
+    image: redis
+    container_name: redis
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  celery:
+    container_name: celery
+    build: .
+    volumes:
+      - shared-data:/src/uploads
+    command: celery -A src.tasks.task_handlers.celery_app worker -B -l INFO
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  shared-data:

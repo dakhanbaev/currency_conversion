@@ -1,5 +1,7 @@
 import uvicorn
 import logging
+from typing import Optional
+import uuid
 from fastapi import FastAPI, HTTPException, status, UploadFile, File
 from src import bootstrap
 from src.entrypoints import schemas, views
@@ -14,13 +16,11 @@ logger = logging.getLogger(__name__)
 @app.delete(
     '/analysis/{request_id}',
     status_code=status.HTTP_204_NO_CONTENT,
-    response_model=schemas.Analysis,
 )
 async def delete_analysis(request_id: str):
     cmd = messages.DeleteAnalyse(request_id)
     await bus.handle(cmd)
-    logger.info(f'currency {request_id}: Deleted successfully')
-    return schemas.ResultSchema(result='Deleted successfully')
+    logger.info(f'analysis {request_id}: Deleted successfully')
 
 
 @app.get(
@@ -28,12 +28,25 @@ async def delete_analysis(request_id: str):
     status_code=status.HTTP_200_OK,
     response_model=schemas.Analysis,
 )
-async def get_analysis(request_id: str) -> schemas.CurrencyGET:
-    result = await views.currencies(request_id, uow=bus.uow)
+async def get_analysis(request_id: str, frame: Optional[int] = None) -> schemas.Analysis:
+    result = await views.get_analysis(request_id, frame,  uow=bus.uow)
     if not result:
         logger.error(f'Not result for request_id : {request_id}')
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='not found')
-    return schemas.CurrencyGET(**result)
+    return result
+
+
+@app.get(
+    '/analysis/{request_id}/{frame}',
+    status_code=status.HTTP_200_OK,
+    response_model=schemas.Analysis,
+)
+async def get_analysis(request_id: str, frame: Optional[int] = None) -> schemas.Analysis:
+    result = await views.get_analysis(request_id, frame,  uow=bus.uow)
+    if not result:
+        logger.error(f'Not result for request_id : {request_id}')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='not found')
+    return result
 
 
 @app.post(
@@ -41,13 +54,24 @@ async def get_analysis(request_id: str) -> schemas.CurrencyGET:
     status_code=status.HTTP_201_CREATED,
 )
 async def post_analysis(file: UploadFile = File(...)):
+    import os
+    request_id = str(uuid.uuid4())
+    _, file_extension = os.path.splitext(file.filename)
+    unique_filename = f"{request_id}{file_extension}"
+    file_path = os.path.join("src/uploads", unique_filename)
+
+    with open(file_path, "wb") as video_file:
+        video_file.write(await file.read())
+
     cmd = messages.SaveAnalyse(
-        file
+        request_id,
+        file_path,
+        file.content_type
     )
-    request_id = await bus.handle(cmd)
-    return schemas.ResultSchema(result='OK')
+    await bus.handle(cmd)
+    return schemas.ResultSchema(result=request_id)
 
 
 if __name__ == '__main__':
     # For debugging
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    uvicorn.run(app, host='0.0.0.0', port=8012)

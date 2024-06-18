@@ -1,7 +1,7 @@
 import inspect
 from src.adapters import orm
 from src.service_layer import handlers, messagebus, unit_of_work
-from src.tasks import tasks
+from src.tasks import task_handlers
 
 
 def bootstrap(
@@ -12,7 +12,7 @@ def bootstrap(
     if start_orm:
         orm.start_mappers()
 
-    dependencies = {'uow': uow,}
+    dependencies = {'uow': uow}
     injected_event_handlers = {
         event_type: [
             inject_dependencies(handler, dependencies) for handler in event_handlers
@@ -24,8 +24,8 @@ def bootstrap(
         for command_type, handler in handlers.COMMAND_HANDLERS.items()
     }
     injected_task_handlers = {
-        task_type: task_handler()
-        for task_type, task_handler in tasks.TASK_HANDLERS.items()
+        task_type: inject_dependencies(task_handler, dependencies)
+        for task_type, task_handler in task_handlers.TASK_HANDLERS.items()
     }
 
     return messagebus.MessageBus(

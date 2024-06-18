@@ -8,6 +8,7 @@ from sqlalchemy import (
     Integer,
     ForeignKey,
     DateTime,
+    ARRAY
 )
 from sqlalchemy.orm import registry
 
@@ -22,7 +23,10 @@ analyses = Table(
     'analyses',
     metadata,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('uuid', String(10), unique=True),
+    Column('uuid', String(100)),
+    Column('frame', Integer),
+    Column('all_frame_count', Integer),
+    Column('data', ARRAY(Float)),
     Column('last_update', DateTime(timezone=True)),
 )
 
@@ -30,7 +34,7 @@ analyses = Table(
 def start_mappers():
     logger.info('Starting mappers')
 
-    conversion_rates_mapper = mapper_registry.map_imperatively(
-        model.ConversionRate, analyses
+    mapper_registry.map_imperatively(
+        model.Analyses, analyses
     )
 

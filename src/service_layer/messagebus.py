@@ -5,6 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Callable, Dict, List, Type, Iterable
 
 from fastapi import HTTPException, status
+import celery
 from src.domain import messages
 
 if TYPE_CHECKING:
@@ -19,7 +20,7 @@ class MessageBus:
         uow: unit_of_work.AbstractUnitOfWork,
         event_handlers: Dict[Type[messages.Event], List[Callable]],
         command_handlers: Dict[Type[messages.Command], Callable],
-        task_handlers: Dict[Type[messages.Task], Callable]
+        task_handlers: Dict[Type[messages.Task], celery.Task]
     ):
         self.uow = uow
         self.event_handlers = event_handlers
@@ -81,7 +82,7 @@ class MessageBus:
         logger.debug('handling task %s', task)
         try:
             handler = self.task_handlers[type(task)]
-            handler.delay(task)
+            handler(task)
         except Exception as e:
             logger.exception('Exception handling task %s', task)
             raise HTTPException(

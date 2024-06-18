@@ -1,8 +1,6 @@
 # pylint: disable=too-few-public-methods
 from dataclasses import dataclass
 from typing import Union
-from fastapi import UploadFile
-import typing
 
 
 class Command:
@@ -14,13 +12,15 @@ class Task:
 
 
 @dataclass
-class DeleteAnalyse(Task):
-    requestId: str
+class DeleteAnalyse(Command):
+    request_id: str
 
 
 @dataclass
-class SaveAnalyse(Command):
-    file: UploadFile
+class SaveAnalyse(Task):
+    request_id: str
+    file_path: str
+    file_content_type: str
 
 
 class Event:

@@ -1,9 +1,14 @@
-from typing import Union
+from typing import Union, Any
 from pydantic import BaseModel, UUID4
+from datetime import datetime
 
 
 class Analysis(BaseModel):
-    requestId: UUID4
+    uuid: str
+    data: Any
+    frame: int
+    all_frame_count: int
+    last_update: datetime
 
 
 class ResultSchema(BaseModel):
