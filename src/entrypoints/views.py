@@ -21,7 +21,7 @@ async def get_analysis(request_id: str, frame: int,  uow: unit_of_work.AbstractU
                     """
                     SELECT uuid, last_update, data, all_frame_count, frame 
                     FROM analyses
-                    WHERE uuid = :request_id
+                    WHERE uuid = :request_id ORDER BY id DESC LIMIT 1
                     """
                 ),
                 {'request_id': request_id},
