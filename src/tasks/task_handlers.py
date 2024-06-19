@@ -2,22 +2,14 @@ import datetime
 import asyncio
 
 from sqlalchemy.exc import ArgumentError
-from celery import Task, Celery
+from celery import Task
 from celery.utils.log import get_task_logger
-from src.domain import messages, model
+from src.domain import model
 from src.service_layer.unit_of_work import SqlAlchemyUnitOfWork
 from src.services import analysis_service
-from src.config import get_redis_uri
 from src.adapters import orm
 
 logger = get_task_logger(__name__)
-
-celery_app = Celery(
-    'worker',
-    broker=get_redis_uri(),
-    backend=get_redis_uri(),
-    include=['src.tasks']
-)
 
 
 class AnalyzeContent(Task):
@@ -64,18 +56,4 @@ class AnalyzeContent(Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         logger.info(f'Task {task_id}| {self.general_log} failed: {exc}')
 
-
-analyze_content = celery_app.register_task(AnalyzeContent())
-celery_app.autodiscover_tasks()
-
-
-def analyze_content_handler(
-    analyse: messages.SaveAnalyse,
-):
-    analyze_content.delay(analyse.__dict__)
-
-
-TASK_HANDLERS = {
-    messages.SaveAnalyse: analyze_content_handler,
-}
 

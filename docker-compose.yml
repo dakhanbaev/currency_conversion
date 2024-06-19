@@ -56,7 +56,7 @@ services:
     build: .
     volumes:
       - shared-data:/src/uploads
-    command: celery -A src.tasks.task_handlers.celery_app worker -B -l INFO
+    command: celery -A src.celery_app worker -B -l INFO
     environment:
       - DB_HOST=db
       - REDIS_HOST=redis

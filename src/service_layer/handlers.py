@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from src.domain import messages
+from src.celery_app import analyze_content
 
 
 if TYPE_CHECKING:
@@ -26,6 +27,17 @@ async def delete_analyse(
 
 async def check_events(check: messages.CheckEvent):
     pass
+
+
+def analyze_content_handler(
+    analyse: messages.SaveAnalyse,
+):
+    analyze_content.delay(analyse.__dict__)
+
+
+TASK_HANDLERS = {
+    messages.SaveAnalyse: analyze_content_handler,
+}
 
 
 COMMAND_HANDLERS = {

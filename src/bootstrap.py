@@ -25,7 +25,7 @@ def bootstrap(
     }
     injected_task_handlers = {
         task_type: inject_dependencies(task_handler, dependencies)
-        for task_type, task_handler in task_handlers.TASK_HANDLERS.items()
+        for task_type, task_handler in handlers.TASK_HANDLERS.items()
     }
 
     return messagebus.MessageBus(
