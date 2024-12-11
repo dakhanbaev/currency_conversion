@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from src.domain import messages
 from src.celery_app import analyze_content
+from src.services import analysis_service
 
 
 if TYPE_CHECKING:
@@ -31,7 +32,11 @@ async def check_events(check: messages.CheckEvent):
 
 def analyze_content_handler(
     analyse: messages.SaveAnalyse,
+    uow: unit_of_work.SqlAlchemyUnitOfWork,
+    service_analysis: analysis_service.AnalysisService
 ):
+    analyze_content.uow = uow
+    analyze_content.service_analysis = service_analysis
     analyze_content.delay(analyse.__dict__)
 
 

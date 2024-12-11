@@ -15,7 +15,7 @@ logger = get_task_logger(__name__)
 class AnalyzeContent(Task):
     date: str
     service_analysis: analysis_service.AnalysisService = analysis_service.AnalysisService()
-    uow: SqlAlchemyUnitOfWork = SqlAlchemyUnitOfWork()
+     uow: SqlAlchemyUnitOfWork
 
     @property
     def general_log(self):

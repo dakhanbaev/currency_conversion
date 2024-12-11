@@ -2,7 +2,6 @@ import pytest
 from fastapi import HTTPException, status
 from src.adapters import repository
 from src.service_layer import unit_of_work
-from src.tasks import external_api
 from src.domain import messages
 from src import bootstrap
 
@@ -23,17 +22,6 @@ class FakeRepository(repository.AbstractRepository):
             if c.id == currency_id:
                 del c.rates
 
-    async def get_rate(self, currency_id: int, rate_code: str):
-        return next(
-            (
-                r
-                for c in self._currencies
-                for r in c.rates
-                if (r.code == rate_code and c.id == currency_id)
-            ),
-            None,
-        )
-
 
 class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
     def __init__(self):
@@ -47,24 +35,13 @@ class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
         pass
 
 
-class FakeExchangeRateApi(external_api.ExternalApi):
-    async def get_all_rates(self, code: str):
-        return {
-            "USD": 1,
-            "AED": 3.6725,
-            "AFN": 73.7913,
-            "ALL": 95.7917,
-            "AMD": 405.2462,
-        }
-
-
 class FakeEvent:
     pass
 
 
 def bootstrap_test_app():
     return bootstrap.bootstrap(
-        start_orm=False, uow=FakeUnitOfWork(), api=FakeExchangeRateApi()
+        start_orm=False, uow=FakeUnitOfWork(),
     )
 
 
